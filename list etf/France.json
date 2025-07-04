@@ -1,0 +1,18 @@
+[
+  "https://www.ishares.com/us/products/239648/ishares-msci-france-etf/1467271812596.ajax?fileType=csv&fileName=EWQ_holdings&dataType=fund",
+  "https://www.ishares.com/us/products/239644/ishares-msci-emu-etf/1467271812596.ajax?fileType=csv&fileName=EZU_holdings&dataType=fund",
+  "https://www.ishares.com/us/products/239736/ishares-europe-etf/1467271812596.ajax?fileType=csv&fileName=IEV_holdings&dataType=fund",
+  "https://www.ishares.com/us/products/264617/ishares-core-msci-europe-etf/1467271812596.ajax?fileType=csv&fileName=IEUR_holdings&dataType=fund",
+  "https://www.ishares.com/us/products/239645/ishares-msci-europe-financials-etf/1467271812596.ajax?fileType=csv&fileName=EUFN_holdings&dataType=fund",
+  "https://www.ishares.com/us/products/239746/ishares-global-infrastructure-etf/1467271812596.ajax?fileType=csv&fileName=IGF_holdings&dataType=fund",
+  "https://www.ishares.com/us/products/307332/fund/1467271812596.ajax?fileType=csv&fileName=IDRV_holdings&dataType=fund",
+  "https://www.ishares.com/us/products/239537/ishares-developed-smallcap-ex-north-america-etf/1467271812596.ajax?fileType=csv&fileName=IEUS_holdings&dataType=fund",
+  "https://www.ishares.com/us/products/239738/ishares-global-clean-energy-etf/1467271812596.ajax?fileType=csv&fileName=ICLN_holdings&dataType=fund",
+  "https://www.ishares.com/us/products/239737/ishares-global-100-etf/1467271812596.ajax?fileType=csv&fileName=IOO_holdings&dataType=fund",
+  "https://www.ishares.com/us/products/239627/ishares-msci-eafe-smallcap-etf/1467271812596.ajax?fileType=csv&fileName=SCZ_holdings&dataType=fund",
+  "https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-speu.xlsx",
+  "\nhttps://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-gnr.xlsx",
+  "\nhttps://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-cnrg.xlsx",
+  "https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-xsd.xlsx",
+  "https://www.ssga.com/us/en/intermediary/library-content/products/fund-data/etfs/us/holdings-daily-us-en-gwx.xlsx"
+]
