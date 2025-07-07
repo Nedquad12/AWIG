@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 class StockAnalyzer:
 
     def __init__(self, data_folder="Saham"):
-        self.data_folder = data_folder
+        self.data_folder = "/home/nedquad12/AWIG/Saham"
         self.scaler = StandardScaler()
         self.model = XGBClassifier(
              objective='multi:softmax',
