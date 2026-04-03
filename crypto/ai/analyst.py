@@ -1,0 +1,326 @@
+
+import json
+import logging
+import os
+import re
+import sys
+import time
+
+import requests
+
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+from config import (
+    DEEPSEEK_API_KEY,
+    DEEPSEEK_BASE_URL,
+    DEEPSEEK_MODEL,
+    RISK_PER_TRADE_PCT,
+)
+from ml.kelly import compute_position, format_for_prompt
+
+logger = logging.getLogger(__name__)
+
+MAX_CANDLES_FOR_AI = 200
+MAX_RETRIES        = 2
+RETRY_DELAY        = 3
+WINRATE_BUFFER     = 0.00
+
+SYSTEM_PROMPT = """\
+You are a crypto futures trading execution engine.
+Your ONLY job is to output a single JSON object based on the data provided.
+You MUST NOT output any text, explanation, reasoning, or commentary outside the JSON.
+You MUST NOT use markdown, code fences, or any wrapper around the JSON.
+Your first character of output MUST be '{' and your last character MUST be '}'."""
+
+
+def _min_winrate(rr: float, buffer: float = WINRATE_BUFFER) -> float:
+    breakeven = 1.0 / (1.0 + rr)
+    threshold = breakeven + buffer
+    return round(max(0.20, min(threshold, 0.55)), 4)
+
+
+def _build_candle_csv(context_df) -> str:
+    cols = [
+        "open_time", "open", "high", "low", "close", "volume", "transactions",
+        "ma10", "ma20", "ma50", "rsi14",
+        "vol_ma10", "vol_ma20", "freq_ma10", "freq_ma20",
+    ]
+    available = [c for c in cols if c in context_df.columns]
+    df_tail   = context_df[available].tail(MAX_CANDLES_FOR_AI).copy()
+    round_map = {
+        "open": 4, "high": 4, "low": 4, "close": 4,
+        "volume": 2, "transactions": 0,
+        "ma10": 4, "ma20": 4, "ma50": 4, "rsi14": 2,
+        "vol_ma10": 2, "vol_ma20": 2,
+        "freq_ma10": 1, "freq_ma20": 1,
+    }
+    for col, dec in round_map.items():
+        if col in df_tail.columns:
+            df_tail[col] = df_tail[col].round(dec)
+    return df_tail.to_csv(index=False)
+
+
+def _build_prompt(pred, bt_result, pos_long, pos_short) -> str:
+    symbol     = pred["symbol"]
+    interval   = pred["interval"]
+    direction  = pred["direction"]
+    conf       = pred["confidence"] * 100
+    cur_price  = pred["current_price"]
+    pred_price = pred["predicted_price"]
+    scores     = pred["scores"]
+    weights    = pred["weights"]
+    w_total    = pred["weighted_total"]
+    bt_sum     = bt_result["summary_text"]
+    candle_csv = _build_candle_csv(pred["context_df"])
+
+    score_lines = "\n".join(
+        f"  {k:<8}: score={v:+.0f}  weight={weights.get(k,1.0):.4f}  contrib={v*weights.get(k,1.0):+.4f}"
+        for k, v in scores.items()
+    )
+
+    rr_long      = pos_long["rr_ratio"]
+    rr_short     = pos_short["rr_ratio"]
+    min_wr_long  = _min_winrate(rr_long)
+    min_wr_short = _min_winrate(rr_short)
+
+    bt_after     = bt_result["after"]
+    wr_long_pct  = bt_after.get("winrate_up", 0) * 100
+    wr_short_pct = bt_after.get("winrate_dn", 0) * 100
+
+    # Tambahkan warning jika winrate di-sanitize
+    wr_long_note  = f" ⚠️ RAW={pos_long['winrate_raw']*100:.1f}%"  if pos_long.get("winrate_warning")  else ""
+    wr_short_note = f" ⚠️ RAW={pos_short['winrate_raw']*100:.1f}%" if pos_short.get("winrate_warning") else ""
+
+    # Cost info dari backtest
+    cost_rate = bt_result.get("cost_rate", 0.0012)
+
+    return f"""=== SYMBOL ===
+{symbol} | {interval}
+
+=== MARKET STATE ===
+Current price : {cur_price}
+ML prediction : {direction} | confidence={conf:.1f}%
+Predicted price (3 candles ahead): {pred_price}
+Weighted score: {w_total:+.4f}
+
+=== INDICATOR SCORES (9 indicators) ===
+{score_lines}
+NOTE: funding & lsr are real-time sentiment filters, not ML features.
+
+=== BACKTEST ===
+{bt_sum}
+Est. transaction cost per round-trip: ~{cost_rate*100:.2f}% (already discounted in winrates above)
+
+=== IF BUYING (pre-calculated by system) ===
+{format_for_prompt(pos_long)}
+
+=== IF SELLING (pre-calculated by system) ===
+{format_for_prompt(pos_short)}
+
+=== WINRATE THRESHOLDS (dynamic, based on RR) ===
+  BUYING  → RR={rr_long:.2f}  | min winrate={min_wr_long*100:.1f}% | actual={wr_long_pct:.1f}%{wr_long_note}  | {'✓ PASS' if wr_long_pct/100 >= min_wr_long else '✗ FAIL'}
+  SELLING → RR={rr_short:.2f} | min winrate={min_wr_short*100:.1f}% | actual={wr_short_pct:.1f}%{wr_short_note} | {'✓ PASS' if wr_short_pct/100 >= min_wr_short else '✗ FAIL'}
+
+=== OHLCV (last {MAX_CANDLES_FOR_AI} candles, {interval}) ===
+{candle_csv}
+
+=== YOUR JOB ===
+Decide BUYING, SELLING, or SKIP based on all data above.
+SL, TP, leverage, qty_fraction are already calculated — do NOT change them.
+Output EXACTLY this JSON and nothing else:
+{{
+  "action": "BUYING" or "SELLING" or "SKIP",
+  "reason": "<2 sentences max, facts only: prices, winrates, edge, indicator values. No opinions.>"
+}}
+
+SKIP if ANY of these conditions are true:
+  - Edge is negative for chosen direction
+  - No clear signal from indicators
+
+NOTE: Winrate shown is blended ML1 (indicator) + ML2 (candle) weighted 1:3.5.
+Candle model is more reliable — do NOT skip based on indicator winrate alone."""
+
+
+def _call_deepseek(prompt: str) -> str:
+    headers = {
+        "Authorization": f"Bearer {DEEPSEEK_API_KEY}",
+        "Content-Type":  "application/json",
+    }
+    payload = {
+        "model":       DEEPSEEK_MODEL,
+        "temperature": 0.0,
+        "max_tokens":  256,
+        "messages": [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user",   "content": prompt},
+        ],
+    }
+
+    url        = f"{DEEPSEEK_BASE_URL}/chat/completions"
+    last_error = None
+
+    for attempt in range(1, MAX_RETRIES + 1):
+        logger.info("[analyst] DeepSeek attempt %d/%d...", attempt, MAX_RETRIES)
+        resp = requests.post(url, headers=headers, json=payload, timeout=120)
+
+        if resp.status_code != 200:
+            raise requests.HTTPError(
+                f"DeepSeek HTTP {resp.status_code}: {resp.text[:300]}", response=resp)
+
+        data    = resp.json()
+        choices = data.get("choices", [])
+        if not choices:
+            last_error = ValueError(f"Tidak ada choices: {json.dumps(data)[:200]}")
+            time.sleep(RETRY_DELAY)
+            continue
+
+        content = (choices[0].get("message", {}).get("content") or "").strip()
+        if not content:
+            last_error = ValueError("Content kosong")
+            time.sleep(RETRY_DELAY)
+            continue
+
+        logger.info("[analyst] OK (%d chars): %s...", len(content), content[:80])
+        return content
+
+    raise last_error or ValueError("Semua retry gagal")
+
+
+def _parse(raw: str) -> dict:
+    for candidate in [
+        raw.strip(),
+        re.sub(r"```(?:json)?|```", "", raw, flags=re.IGNORECASE).strip(),
+    ]:
+        try:
+            return json.loads(candidate)
+        except json.JSONDecodeError:
+            pass
+
+    match = re.search(r"\{[\s\S]*\}", raw)
+    if match:
+        try:
+            return json.loads(match.group())
+        except json.JSONDecodeError:
+            pass
+
+    raise ValueError(f"Tidak bisa parse JSON (len={len(raw)})")
+
+
+def _validate_action(parsed: dict) -> str:
+    action = str(parsed.get("action", "SKIP")).upper()
+    if action in ("HOLD", "NONE", "NEUTRAL", "NO_TRADE"):
+        action = "SKIP"
+    if action not in ("BUYING", "SELLING", "SKIP"):
+        action = "SKIP"
+    return action
+
+
+# Bobot blend winrate: candle model lebih reliable dari indikator
+_W_INDICATOR = 1.0
+_W_CANDLE    = 3.5
+
+
+def _blend_winrate(wr_indicator: float, wr_candle) -> float:
+    """
+    Gabungkan winrate ML1 (indikator) dan ML2 (candle) dengan bobot 1:3.5.
+    Jika candle model tidak tersedia, pakai indikator saja.
+    """
+    if wr_candle is None or wr_candle <= 0:
+        return wr_indicator
+    blended = (wr_indicator * _W_INDICATOR + wr_candle * _W_CANDLE) / (_W_INDICATOR + _W_CANDLE)
+    return round(blended, 4)
+
+
+def analyze(pred: dict, bt_result: dict, train_result: dict) -> dict:
+    symbol   = pred["symbol"]
+    raw_df   = train_result["raw_df"]
+    bt_after = bt_result["after"]
+    risk_max = RISK_PER_TRADE_PCT / 100
+
+    logger.info("[analyst] Computing position sizing for %s...", symbol)
+
+    # Ambil winrate candle model jika tersedia
+    candle_result = train_result.get("candle_result")
+    candle_bt     = candle_result.get("backtest", {}) if candle_result and candle_result.get("ok") else {}
+    wr_candle_up  = candle_bt.get("winrate_up") if candle_bt else None
+    wr_candle_dn  = candle_bt.get("winrate_dn") if candle_bt else None
+
+    # Winrate ML1 (indikator) dari backtest
+    wr_ind_up = float(bt_after.get("winrate_up", 0.0))
+    wr_ind_dn = float(bt_after.get("winrate_dn", 0.0))
+
+    # Blend ML1 + ML2 dengan bobot 1:3.5
+    wr_long  = _blend_winrate(wr_ind_up, wr_candle_up)
+    wr_short = _blend_winrate(wr_ind_dn, wr_candle_dn)
+
+    logger.info(
+        "[analyst] %s winrate blend — LONG: ind=%.1f%% candle=%.1f%% blend=%.1f%% | "
+        "SHORT: ind=%.1f%% candle=%.1f%% blend=%.1f%%",
+        symbol,
+        wr_ind_up * 100, (wr_candle_up or 0) * 100, wr_long * 100,
+        wr_ind_dn * 100, (wr_candle_dn or 0) * 100, wr_short * 100,
+    )
+
+    # n_signals: gabungkan ML1 + ML2 untuk validasi sample size
+    n_signals_long  = bt_after.get("n_signal_up", 0) + candle_bt.get("n_signal_up", 0)
+    n_signals_short = bt_after.get("n_signal_dn", 0) + candle_bt.get("n_signal_dn", 0)
+
+    pos_long = compute_position(
+        df=raw_df,
+        direction="LONG",
+        winrate=wr_long,
+        n_signals=n_signals_long,
+        risk_per_trade=risk_max,
+        max_fraction=risk_max,
+    )
+    pos_short = compute_position(
+        df=raw_df,
+        direction="SHORT",
+        winrate=wr_short,
+        n_signals=n_signals_short,
+        risk_per_trade=risk_max,
+        max_fraction=risk_max,
+    )
+
+    logger.info("[analyst] Calling DeepSeek for %s...", symbol)
+
+    try:
+        prompt = _build_prompt(pred, bt_result, pos_long, pos_short)
+        raw    = _call_deepseek(prompt)
+        parsed = _parse(raw)
+        action = _validate_action(parsed)
+        reason = str(parsed.get("reason", ""))
+
+        if action == "BUYING":
+            pos = pos_long
+        elif action == "SELLING":
+            pos = pos_short
+        else:
+            pos = pos_long
+
+        return {
+            "ok":             True,
+            "raw_response":   raw,
+            "action":         action,
+            "entry_price":    pos["entry_price"],
+            "stop_loss":      pos["stop_loss"],
+            "take_profit":    pos["take_profit"],
+            "leverage":       pos["leverage"],
+            "qty_fraction":   pos["qty_fraction"],
+            "reason":         reason,
+            "position_detail": pos,
+        }
+
+    except requests.HTTPError as e:
+        msg = f"DeepSeek HTTP error: {e}"
+        logger.error("[analyst] %s", msg)
+        return {"ok": False, "reason_fail": msg, "action": "SKIP"}
+
+    except ValueError as e:
+        msg = str(e)
+        logger.error("[analyst] %s", msg)
+        return {"ok": False, "reason_fail": msg, "action": "SKIP"}
+
+    except Exception as e:
+        msg = f"Unexpected error: {e}"
+        logger.exception("[analyst] %s", msg)
+        return {"ok": False, "reason_fail": msg, "action": "SKIP"}
