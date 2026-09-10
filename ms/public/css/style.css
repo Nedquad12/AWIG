@@ -1,0 +1,78 @@
+
+/* LIGHT MODE (DEFAULT) */
+:root {
+    --bg-main: #f8fafc;
+    --bg-header: rgba(248, 250, 252, 0.85);
+    --card-bg: #ffffff;
+    --card-inner: #f1f5f9;
+    --card-border: #e2e8f0;
+    --text-primary: #0f172a;
+    --text-secondary: #475569;
+    --accent-blue: #2563eb;
+    --accent-cyan: #0284c7;
+    --accent-emerald: #059669;
+    --glow-effect: rgba(37, 99, 235, 0.08);
+    --shadow-card: 0 4px 20px -2px rgba(0, 0, 0, 0.05);
+}
+
+/* DARK MODE */
+[data-theme="dark"] {
+    --bg-main: #06090e;
+    --bg-header: rgba(6, 9, 14, 0.85);
+    --card-bg: #0d121d;
+    --card-inner: #131b2e;
+    --card-border: #1e293b;
+    --text-primary: #f8fafc;
+    --text-secondary: #94a3b8;
+    --accent-blue: #3b82f6;
+    --accent-cyan: #38bdf8;
+    --accent-emerald: #10b981;
+    --glow-effect: rgba(56, 189, 248, 0.12);
+    --shadow-card: 0 10px 30px -10px rgba(0, 0, 0, 0.5);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+    transition: background-color 0.25s ease, border-color 0.25s ease, color 0.25s ease;
+}
+
+body {
+    background-color: var(--bg-main);
+    color: var(--text-primary);
+    line-height: 1.6;
+    letter-spacing: -0.011em;
+}
+
+/* Elegant Card Component */
+.bm-card {
+    background: var(--card-bg);
+    border: 1px solid var(--card-border);
+    border-radius: 20px;
+    box-shadow: var(--shadow-card);
+}
+
+.bm-card:hover {
+    border-color: var(--accent-cyan);
+    box-shadow: 0 12px 30px -8px var(--glow-effect);
+}
+
+/* Typography Accent */
+.bm-heading {
+    font-weight: 800;
+    letter-spacing: -0.03em;
+    color: var(--text-primary);
+}
+
+.bm-gradient-text {
+    background: linear-gradient(135deg, var(--accent-blue) 0%, var(--accent-cyan) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-main); }
+::-webkit-scrollbar-thumb { background: var(--card-border); border-radius: 4px; }

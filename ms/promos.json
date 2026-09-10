@@ -1,0 +1,17 @@
+{
+  "DISKON10": {
+    "type": "percentage",
+    "value": 0,
+    "description": "None"
+  },
+  "HEMAT50K": {
+    "type": "fixed",
+    "value": 10000,
+    "description": "Potongan"
+  },
+  "VIPPROMO": {
+    "type": "percentage",
+    "value": 0,
+    "description": "What"
+  }
+}

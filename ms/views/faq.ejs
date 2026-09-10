@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FAQ - PT Membahas Saham Indonesia</title>
+    <link rel="icon" type="image/jpeg" href="/images/logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="antialiased min-h-screen">
+
+    <!-- Header / Navbar -->
+    <header class="border-b border-[var(--card-border)] bg-[var(--bg-header)] backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-4xl mx-auto px-4 py-3 flex justify-between items-center">
+            
+            <a href="/" class="flex items-center">
+                <img src="/images/logo.png" alt="Logo PT Membahas Saham Indonesia" class="h-9 w-auto object-contain hover:scale-105 transition">
+            </a>
+            
+            <nav class="flex items-center space-x-2 md:space-x-4 text-sm font-semibold">
+                <a href="/" class="text-[var(--text-secondary)] hover:text-[var(--accent-blue)] transition flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-[var(--card-inner)]">
+                    <i class="fa-solid fa-house text-[var(--accent-blue)]"></i>
+                    <span>Beranda</span>
+                </a>
+                <a href="/contact" class="text-[var(--text-secondary)] hover:text-[var(--accent-blue)] transition flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-[var(--card-inner)]">
+                    <i class="fa-solid fa-headset text-[var(--accent-blue)]"></i>
+                    <span>Contact</span>
+                </a>
+
+                <!-- TOGGLE LIGHT / DARK MODE -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-primary)] hover:border-[var(--accent-blue)] px-3 py-2 rounded-xl text-xs flex items-center gap-2 transition ml-2 shadow-sm">
+                    <i id="themeIcon" class="fa-solid fa-sun text-amber-500"></i>
+                    <span id="themeText" class="hidden sm:inline font-bold">Light</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-4xl mx-auto px-4 py-12">
+        <a href="/" class="text-xs text-[var(--text-secondary)] hover:text-[var(--accent-blue)] inline-flex items-center gap-1 mb-6 transition font-medium">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda
+        </a>
+        
+        <h1 class="text-3xl bm-heading mb-2">❓ Pertanyaan Sering Diajukan (FAQ)</h1>
+        <p class="text-[var(--text-secondary)] text-sm mb-8">Informasi lengkap mengenai layanan VIP Membership dan kebijakan PT Membahas Saham Indonesia</p>
+        
+        <div class="space-y-4">
+
+            <!-- FAQ 1: Pemula -->
+            <div class="bm-card p-6 transition">
+                <h3 class="bm-heading text-lg mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question text-[var(--accent-blue)]"></i>
+                    Apakah VIP Membership ini cocok untuk pemula?
+                </h3>
+                <p class="text-[var(--text-secondary)] text-sm leading-relaxed">
+                    Sangat cocok. Anggota pemula akan didampingi secara terstruktur melalui analisa komprehensif (Teknikal, Bandarmology/Flow, dan Fundamental), instruksi sinyal berbasis AI & pilihan Tim Analis, serta sesi Edukasi Live Interaktif setiap hari Minggu untuk memahami analisa pasar secara bertahap.
+                </p>
+            </div>
+
+            <!-- FAQ 2: Fasilitas Utama VIP -->
+            <div class="bm-card p-6 transition">
+                <h3 class="bm-heading text-lg mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-circle-question text-[var(--accent-blue)]"></i>
+                    Fasilitas apa saja yang saya dapatkan dalam VIP Membership?
+                </h3>
+                <div class="text-[var(--text-secondary)] text-sm leading-relaxed space-y-2">
+                    <p>Sebagai member VIP, Anda mendapatkan akses penuh ke:</p>
+                    <ul class="list-disc pl-5 space-y-1">
+                        <li><strong>Integrasi Tools AI:</strong> Screener dan sinyal saham berbasis AI & pilihan Tim Analis.</li>
+                        <li><strong>Analisa 3 Pilar:</strong> Kombinasi Teknikal, Arus Uang/Bandarmology, dan Kesehatan Perusahaan (Fundamental).</li>
+                        <li><strong>Edukasi Live Interaktif:</strong> Sesi webinar, analisa pasar langsung, dan diskusi intensif setiap hari Minggu.</li>
+                        <li><strong>Pendampingan & Konsultasi Dua Arah:</strong> Bebas konsultasi portofolio pribadi bersama tim analis (aktif pukul 08.00 - 22.00 WIB).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- FAQ 3: Garansi Loss -->
+            <div class="bm-card p-6 transition">
+                <h3 class="bm-heading text-lg mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-shield-halved text-[var(--accent-blue)]"></i>
+                    Bagaimana cara kerja Ketentuan Garansi Loss (Jaminan Bebas Kerugian)?
+                </h3>
+                <p class="text-[var(--text-secondary)] text-sm leading-relaxed">
+                    Kami berkomitmen untuk memberikan jaminan perlindungan masa aktif. Apabila portofolio Anda mengalami kerugian (loss) secara akumulatif selama periode berlangganan VIP, Anda berhak mengajukan perpanjangan masa aktif VIP secara <strong>GRATIS tanpa biaya tambahan</strong>. Garansi ini adalah perlindungan durasi keanggotaan, bukan jaminan pasti untung/fixed return.
+                </p>
+            </div>
+
+            <!-- FAQ 4: Harga Paket -->
+            <div class="bm-card p-6 transition">
+                <h3 class="bm-heading text-lg mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-tags text-[var(--accent-blue)]"></i>
+                    Berapa biaya langganan VIP Membership?
+                </h3>
+                <div class="text-[var(--text-secondary)] text-sm leading-relaxed">
+                    <p class="mb-2">Kami menyediakan beberapa pilihan periode langganan sesuai kebutuhan Anda:</p>
+                    <ul class="list-disc pl-5 space-y-1 font-medium text-[var(--text-primary)]">
+                        <li><strong>1 Bulan:</strong> Rp 199.000</li>
+                        <li><strong>3 Bulan:</strong> Rp 555.000</li>
+                        <li><strong>6 Bulan:</strong> Rp 1.080.000</li>
+                        <li><strong>1 Tahun:</strong> Rp 1.800.000</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- FAQ 5: Jam Operasional Konsultasi -->
+            <div class="bm-card p-6 transition">
+                <h3 class="bm-heading text-lg mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-clock text-[var(--accent-blue)]"></i>
+                    Kapan layanan konsultasi portofolio bisa diakses?
+                </h3>
+                <p class="text-[var(--text-secondary)] text-sm leading-relaxed">
+                    Layanan pendampingan dan konsultasi portofolio dua arah bersama tim analis aktif setiap hari mulai pukul <strong>08.00 hingga 22.00 WIB</strong>.
+                </p>
+            </div>
+
+            <!-- FAQ 6: Metode Pembayaran -->
+            <div class="bm-card p-6 transition">
+                <h3 class="bm-heading text-lg mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-building-columns text-[var(--accent-blue)]"></i>
+                    Ke rekening mana pembayaran harus ditransfer?
+                </h3>
+                <p class="text-[var(--text-secondary)] text-sm leading-relaxed">
+                    Seluruh transaksi pembayaran resmi disalurkan ke rekening atas nama badan hukum kami: <strong>Bank OCBC NISP No. 693800148936 a.n PT MEMBAHAS SAHAM INDONESIA</strong> atau melalui scan Kode QRIS resmi perusahaan.
+                </p>
+            </div>
+
+            <!-- FAQ 7: Verifikasi Pembayaran -->
+            <div class="bm-card p-6 transition">
+                <h3 class="bm-heading text-lg mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-envelope-circle-check text-[var(--accent-blue)]"></i>
+                    Berapa lama proses verifikasi pembayaran setelah bukti dikirim?
+                </h3>
+                <p class="text-[var(--text-secondary)] text-sm leading-relaxed">
+                    Tim finance PT Membahas Saham Indonesia akan memverifikasi bukti pembayaran Anda dalam kurun waktu <strong>maksimal 1x12 jam</strong>. Setelah terverifikasi, link akses Telegram VIP akan dikirimkan langsung ke alamat email Anda.
+                </p>
+            </div>
+
+            <!-- FAQ 8: Layanan Bantuan / Kontak -->
+            <div class="bm-card p-6 transition">
+                <h3 class="bm-heading text-lg mb-2 flex items-center gap-2">
+                    <i class="fa-solid fa-envelope text-[var(--accent-blue)]"></i>
+                    Ke mana saya harus menghubungi jika membutuhkan bantuan?
+                </h3>
+                <p class="text-[var(--text-secondary)] text-sm leading-relaxed">
+                    Anda dapat menghubungi tim layanan pelanggan kami melalui email resmi di <a href="mailto:hello@membahassahamindonesia.com" class="text-[var(--accent-blue)] underline font-semibold">hello@membahassahamindonesia.com</a> atau mengunjungi situs resmi kami di <a href="https://membahassahamindonesia.com" target="_blank" rel="noopener noreferrer" class="text-[var(--accent-blue)] underline font-semibold">https://membahassahamindonesia.com</a>.
+                </p>
+            </div>
+
+        </div>
+    </main>
+
+    <!-- SCRIPT TEMA -->
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateToggleUI(newTheme);
+        }
+
+        function updateToggleUI(theme) {
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+            
+            if (theme === 'dark') {
+                icon.className = 'fa-solid fa-moon text-amber-400';
+                text.innerText = 'Dark';
+            } else {
+                icon.className = 'fa-solid fa-sun text-amber-500';
+                text.innerText = 'Light';
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateToggleUI(savedTheme);
+    </script>
+</body>
+</html>

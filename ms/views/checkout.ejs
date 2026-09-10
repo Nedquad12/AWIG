@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Checkout VIP - PT MEMBAHAS SAHAM INDONESIA</title>
+    <link rel="icon" type="image/jpeg" href="/images/logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="antialiased min-h-screen flex items-center justify-center p-4">
+
+    <div class="max-w-lg w-full bm-card p-6 md:p-8 my-8 relative">
+        <div class="text-center mb-6">
+            <a href="/" class="text-xs text-[var(--text-secondary)] hover:text-[var(--accent-blue)] inline-flex items-center gap-1 mb-4 transition">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda
+            </a>
+            <h1 class="text-2xl bm-heading">Selesaikan Pendaftaran VIP</h1>
+            <p class="text-xs text-[var(--text-secondary)] mt-1">Transfer langsung ke rekening resmi PT MEMBAHAS SAHAM INDONESIA</p>
+        </div>
+
+        <!-- TAMPILAN PAKET -->
+        <div class="bg-[var(--card-inner)] border border-[var(--card-border)] rounded-2xl p-4 mb-6">
+            <div class="flex justify-between items-start">
+                <div>
+                    <span class="text-[10px] text-[var(--accent-blue)] uppercase font-semibold bg-blue-500/10 px-2 py-0.5 rounded border border-blue-500/20">Paket Terpilih</span>
+                    <h3 class="bm-heading text-lg mt-1"><%= selectedPackage.duration %></h3>
+                </div>
+                <div class="text-right">
+                    <span class="text-[10px] text-[var(--text-secondary)] block">Total Tagihan:</span>
+                    <div id="priceContainer" class="mt-0.5">
+                        <p id="originalPrice" class="text-[var(--accent-blue)] font-extrabold text-lg"><%= selectedPackage.priceFormatted %></p>
+                        <p id="promoPrice" class="text-emerald-600 font-extrabold text-lg hidden"></p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="mt-3 pt-3 border-t border-[var(--card-border)] text-[11px] space-y-1">
+                <p class="text-emerald-600 font-semibold flex items-center gap-1.5">
+                    <i class="fa-solid fa-shield-halved"></i> Dilindungi Garansi Bebas Loss (Perpanjangan VIP Gratis)
+                </p>
+                <p class="text-[var(--text-secondary)] flex items-center gap-1.5">
+                    <i class="fa-solid fa-check text-[var(--accent-blue)]"></i> Akses Screener AI + Pendampingan Analis (08.00 - 22.00 WIB)
+                </p>
+            </div>
+        </div>
+
+        <!-- FORM UTAMA -->
+        <form id="checkoutForm" onsubmit="handleFormSubmit(event)" class="space-y-4">
+            <input type="hidden" id="packageCode" value="<%= selectedPackage.code %>">
+
+            <div>
+                <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+                    Alamat Email <span class="text-rose-500">* (Untuk menerima undangan Telegram VIP)</span>
+                </label>
+                <input type="email" id="userEmail" required placeholder="nama@email.com"
+                    class="w-full bg-[var(--card-inner)] border border-[var(--card-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-blue)] transition">
+            </div>
+
+            <div>
+                <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1">
+                    Username Telegram <span class="text-rose-500">*</span>
+                </label>
+                <input type="text" id="userTelegram" required placeholder="@username_telegram"
+                    class="w-full bg-[var(--card-inner)] border border-[var(--card-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-blue)] transition">
+            </div>
+
+            <!-- PROMO -->
+            <div>
+                <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1">Kode Promo (Opsional)</label>
+                <div class="flex gap-2">
+                    <input type="text" id="promoCode" placeholder="Contoh: DISKON10"
+                        class="w-full bg-[var(--card-inner)] border border-[var(--card-border)] rounded-xl px-4 py-3 text-[var(--text-primary)] uppercase focus:outline-none focus:border-[var(--accent-blue)] transition">
+                    <button type="button" onclick="applyPromo()" class="bg-[var(--card-inner)] hover:bg-[var(--card-border)] text-[var(--text-primary)] px-4 py-3 rounded-xl font-semibold text-sm border border-[var(--card-border)] transition">
+                        Gunakan
+                    </button>
+                </div>
+                <p id="promoMessage" class="text-xs mt-1 hidden"></p>
+            </div>
+
+            <button type="submit" id="payBtn" class="w-full bg-gradient-to-r from-blue-600 to-cyan-500 hover:opacity-90 text-white font-bold py-3.5 px-6 rounded-xl shadow-md transition mt-6 flex items-center justify-center space-x-2">
+                <span>Lanjut ke Pembayaran</span>
+                <i class="fa-solid fa-arrow-right text-sm"></i>
+            </button>
+        </form>
+    </div>
+
+    <!-- MODAL PEMBAYARAN -->
+    <div id="paymentModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden flex items-center justify-center p-4 z-50">
+        <div class="max-w-md w-full bm-card p-6 relative max-h-[90vh] overflow-y-auto">
+            <button onclick="closeModal()" class="absolute top-4 right-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-lg">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <h2 class="text-xl bm-heading text-center mb-1">Pilih Metode Pembayaran</h2>
+            <p class="text-xs text-[var(--text-secondary)] text-center mb-5">Transfer ke Rekening Resmi PT MEMBAHAS SAHAM INDONESIA</p>
+
+            <div class="bg-[var(--card-inner)] border border-amber-500/30 p-3 rounded-xl mb-5 text-center">
+                <span class="text-[11px] text-amber-600 font-semibold block uppercase">Total Pembayaran:</span>
+                <span id="lockedPriceDisplay" class="text-2xl bm-heading">Rp 0</span>
+            </div>
+
+            <!-- OCBC -->
+            <div class="bg-[var(--card-inner)] border border-[var(--card-border)] rounded-xl p-4 mb-4">
+                <div class="flex items-center gap-3 mb-3">
+                    <img src="/images/ocbc.png" alt="Bank OCBC Logo" class="h-8 object-contain rounded bg-white p-1 border">
+                    <div>
+                        <h4 class="bm-heading text-sm">Bank OCBC NISP</h4>
+                        <p class="text-[11px] text-[var(--text-secondary)]">Transfer Bank / M-Banking</p>
+                    </div>
+                </div>
+                <div class="bg-[var(--bg-main)] p-3 rounded-lg border border-[var(--card-border)] text-xs space-y-1">
+                    <p class="text-[var(--text-secondary)]">No. Rekening:</p>
+                    <div class="flex justify-between items-center">
+                        <span class="font-mono text-base font-bold text-[var(--accent-blue)] tracking-wider">693800148936</span>
+                        <button type="button" onclick="copyText('693800148936')" class="text-[10px] bg-[var(--card-inner)] hover:bg-[var(--card-border)] text-[var(--text-primary)] px-2 py-1 rounded border border-[var(--card-border)]">
+                            <i class="fa-regular fa-copy"></i> Salin
+                        </button>
+                    </div>
+                    <p class="text-[var(--text-secondary)] pt-1">Atas Nama:</p>
+                    <p class="bm-heading">PT MEMBAHAS SAHAM INDONESIA</p>
+                </div>
+            </div>
+
+            <!-- QRIS -->
+            <div class="bg-[var(--card-inner)] border border-[var(--card-border)] rounded-xl p-4 mb-5">
+                <div class="flex items-center gap-2 mb-3">
+                    <i class="fa-solid fa-qrcode text-emerald-600 text-lg"></i>
+                    <div>
+                        <h4 class="bm-heading text-sm">QRIS (Semua E-Wallet & Bank)</h4>
+                        <p class="text-[11px] text-[var(--text-secondary)]">Scan QR Code via GoPay, OVO, Dana, ShopeePay, BCA, dll</p>
+                    </div>
+                </div>
+                <div class="bg-[var(--bg-main)] p-3 rounded-lg border border-[var(--card-border)] text-center">
+                    <img src="/images/qris.jpg" alt="QRIS" class="max-w-[200px] mx-auto rounded-lg border border-[var(--card-border)] mb-2">
+                    <p class="text-[11px] font-semibold text-[var(--text-primary)]">a.n. PT MEMBAHAS SAHAM INDONESIA</p>
+                </div>
+            </div>
+
+            <!-- UPLOAD -->
+            <form id="confirmPaymentForm" onsubmit="submitProof(event)" class="space-y-4 border-t border-[var(--card-border)] pt-4">
+                <div>
+                    <label class="block text-xs font-semibold text-[var(--text-secondary)] mb-1.5">Unggah Bukti Transfer / Pembayaran *</label>
+                    <input type="file" id="paymentProof" required accept="image/*,.pdf"
+                        class="w-full text-xs text-[var(--text-secondary)] file:mr-3 file:py-2 file:px-4 file:rounded-xl file:border-0 file:text-xs file:font-semibold file:bg-[var(--accent-blue)] file:text-white hover:file:opacity-90 bg-[var(--card-inner)] border border-[var(--card-border)] rounded-xl">
+                </div>
+
+                <div class="bg-emerald-500/10 border border-emerald-500/20 rounded-xl p-3 text-[11px] text-emerald-700 dark:text-emerald-300 space-y-1">
+                    <p class="font-bold flex items-center gap-1.5">
+                        <i class="fa-solid fa-bolt"></i> Diproses Cepat Dalam 10 Menit
+                    </p>
+                    <p class="text-[var(--text-secondary)]">Tim kami akan langsung memverifikasi bukti transfer Anda secara kilat. Undangan akses Telegram VIP akan dikirimkan langsung ke email Anda.</p>
+                </div>
+
+                <button type="submit" id="submitProofBtn" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 px-4 rounded-xl text-sm transition shadow-md">
+                    Kirim Bukti Pembayaran
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+
+        let appliedPromoCode = "";
+        let finalLockedAmount = <%= selectedPackage.price %>;
+
+        async function applyPromo() {
+            const promoInput = document.getElementById('promoCode').value.trim();
+            const packageCode = document.getElementById('packageCode').value;
+            const promoMsg = document.getElementById('promoMessage');
+            const originalPrice = document.getElementById('originalPrice');
+            const promoPrice = document.getElementById('promoPrice');
+
+            if (!promoInput) return;
+
+            try {
+                const res = await fetch('/api/verify-promo', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ promoCode: promoInput, packageCode: packageCode })
+                });
+
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    appliedPromoCode = promoInput.toUpperCase();
+                    finalLockedAmount = data.finalPrice;
+                    
+                    promoMsg.className = "text-xs mt-1 text-emerald-600 block";
+                    promoMsg.innerText = `✅ Promo berhasil dipasang! (${data.description})`;
+                    
+                    originalPrice.className = "text-[var(--text-secondary)] line-through text-xs";
+                    promoPrice.innerText = `Rp ${data.finalPrice.toLocaleString('id-ID')}`;
+                    promoPrice.classList.remove('hidden');
+                } else {
+                    appliedPromoCode = "";
+                    finalLockedAmount = <%= selectedPackage.price %>;
+                    
+                    promoMsg.className = "text-xs mt-1 text-rose-500 block";
+                    promoMsg.innerText = "❌ " + data.message;
+                    
+                    originalPrice.className = "text-[var(--accent-blue)] font-extrabold text-lg";
+                    promoPrice.classList.add('hidden');
+                }
+            } catch (err) {
+                alert("Gagal memverifikasi kode promo.");
+            }
+        }
+
+        function handleFormSubmit(e) {
+            e.preventDefault();
+            document.getElementById('lockedPriceDisplay').innerText = `Rp ${finalLockedAmount.toLocaleString('id-ID')}`;
+            document.getElementById('paymentModal').classList.remove('hidden');
+        }
+
+        function closeModal() {
+            document.getElementById('paymentModal').classList.add('hidden');
+        }
+
+        function copyText(text) {
+            navigator.clipboard.writeText(text);
+            alert("Nomor rekening berhasil disalin!");
+        }
+
+        async function submitProof(e) {
+            e.preventDefault();
+            const btn = document.getElementById('submitProofBtn');
+            const fileInput = document.getElementById('paymentProof');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                alert("Harap pilih foto/file bukti transfer terlebih dahulu.");
+                return;
+            }
+
+            btn.disabled = true;
+            btn.innerText = "Memproses Pembayaran...";
+
+            const formData = new FormData();
+            formData.append('packageCode', document.getElementById('packageCode').value);
+            formData.append('email', document.getElementById('userEmail').value);
+            formData.append('telegramUsername', document.getElementById('userTelegram').value);
+            formData.append('promoCode', appliedPromoCode);
+            formData.append('finalPrice', finalLockedAmount);
+            formData.append('paymentProof', fileInput.files[0]);
+
+            try {
+                const res = await fetch('/api/submit-manual-payment', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await res.json();
+
+                if (data.status === 'success') {
+                    window.location.href = "/success";
+                } else {
+                    alert("Gagal: " + data.message);
+                    btn.disabled = false;
+                    btn.innerText = "Kirim Bukti Pembayaran";
+                }
+            } catch (err) {
+                alert("Terjadi kesalahan saat mengunggah bukti.");
+                btn.disabled = false;
+                btn.innerText = "Kirim Bukti Pembayaran";
+            }
+        }
+    </script>
+</body>
+</html>
