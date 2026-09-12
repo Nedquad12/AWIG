@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="light">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link rel="icon" type="image/jpeg" href="/images/logo.png">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body class="antialiased min-h-screen">
+
+<!-- Header / Navbar -->
+    <header class="border-b border-[var(--card-border)] bg-[var(--bg-header)] backdrop-blur-md sticky top-0 z-50">
+        <div class="max-w-6xl mx-auto px-4 py-3 flex justify-between items-center">
+            
+            <!-- 1. BAGIAN LOGO (Mengarah ke Beranda VIP & Ada Tulisan Membership) -->
+            <a href="/" class="flex items-center gap-2">
+                <img src="/images/logo.png" alt="Logo" class="h-9 w-auto object-contain hover:scale-105 transition">
+                <span class="bm-heading text-sm font-bold hidden sm:inline">Membership VIP</span>
+            </a>
+            
+            <!-- 2. BAGIAN MENU NAVIGASI KANAN -->
+            <nav class="flex items-center space-x-2 md:space-x-4 text-sm font-semibold">
+                <a href="/" class="text-[var(--text-secondary)] hover:text-[var(--accent-blue)] transition flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-[var(--card-inner)]">
+                    <span>Membership</span>
+                </a>
+                <a href="/faq" class="text-[var(--text-secondary)] hover:text-[var(--accent-blue)] transition flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-[var(--card-inner)]">
+                    <i class="fa-solid fa-circle-question text-[var(--accent-blue)]"></i>
+                    <span>FAQ</span>
+                </a>
+                <a href="/contact" class="text-[var(--text-secondary)] hover:text-[var(--accent-blue)] transition flex items-center gap-1.5 px-3 py-1.5 rounded-xl hover:bg-[var(--card-inner)]">
+                    <i class="fa-solid fa-headset text-[var(--accent-blue)]"></i>
+                    <span>Contact</span>
+                </a>
+                <a href="#pricing-section" class="bg-gradient-to-r from-blue-600 to-cyan-500 text-white font-bold px-4 py-2 rounded-xl shadow-md transition hover:opacity-90">
+                    Harga
+                </a>
+
+                <!-- TOMBOL KELUAR / KEMBALI KE WEB UTAMA (LOGIN) -->
+                <a href="https://membahassahamindonesia.com" class="text-rose-500 hover:bg-rose-500/10 px-3 py-1.5 rounded-xl transition text-xs font-bold border border-rose-500/20">
+                    <i class="fa-solid fa-right-from-bracket"></i> Keluar
+                </a>
+
+                <!-- TOGGLE LIGHT / DARK MODE -->
+                <button id="themeToggleBtn" onclick="toggleTheme()" class="bg-[var(--card-bg)] border border-[var(--card-border)] text-[var(--text-primary)] hover:border-[var(--accent-blue)] px-3 py-2 rounded-xl text-xs flex items-center gap-2 transition ml-2 shadow-sm">
+                    <i id="themeIcon" class="fa-solid fa-sun text-amber-500"></i>
+                    <span id="themeText" class="hidden sm:inline font-bold">Light</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+
+    <main class="max-w-3xl mx-auto px-4 py-12">
+        <a href="/" class="text-xs text-[var(--text-secondary)] hover:text-[var(--accent-blue)] inline-flex items-center gap-1 mb-6 transition font-medium">
+            <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda
+        </a>
+        
+        <h1 class="text-3xl bm-heading mb-2">📞 Hubungi Kami</h1>
+        <p class="text-[var(--text-secondary)] text-sm mb-8">PT MEMBAHAS SAHAM INDONESIA - Official Contact Support</p>
+        
+        <div class="space-y-4">
+            <a href="https://t.me/Rendanggedang" target="_blank" class="block bm-card hover:border-[var(--accent-blue)] p-6 transition group">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-blue-500/10 text-[var(--accent-blue)] flex items-center justify-center text-2xl border border-blue-500/20 shrink-0">
+                        <i class="fa-brands fa-telegram"></i>
+                    </div>
+                    <div>
+                        <h3 class="bm-heading text-lg group-hover:text-[var(--accent-blue)] transition">💬 Customer Service Telegram</h3>
+                        <p class="text-[var(--text-secondary)] text-sm mt-1 leading-relaxed">Bantuan pendaftaran, konfirmasi bukti pembayaran, & konsultasi membership (08.00 - 22.00 WIB). Gunakan perintah /affreff pada bot</p>
+                    </div>
+                </div>
+            </a>
+
+            <a href="https://t.me/msipaybot" target="_blank" class="block bm-card hover:border-emerald-500 p-6 transition group">
+                <div class="flex items-start gap-4">
+                    <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center text-2xl border border-emerald-500/20 shrink-0">
+                        <i class="fa-solid fa-handshake"></i>
+                    </div>
+                    <div>
+                        <h3 class="bm-heading text-lg group-hover:text-emerald-600 transition">🤝 Program Kemitraan / Affiliate</h3>
+                        <p class="text-[var(--text-secondary)] text-sm mt-1 leading-relaxed">Dapatkan komisi berjenjang hingga 20% dengan merekomendasikan VIP Membership kami.</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+    </main>
+
+    <!-- SCRIPT TEMA -->
+    <script>
+        function toggleTheme() {
+            const html = document.documentElement;
+            const currentTheme = html.getAttribute('data-theme');
+            const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+            
+            html.setAttribute('data-theme', newTheme);
+            localStorage.setItem('theme', newTheme);
+            updateToggleUI(newTheme);
+        }
+
+        function updateToggleUI(theme) {
+            const icon = document.getElementById('themeIcon');
+            const text = document.getElementById('themeText');
+            
+            if (theme === 'dark') {
+                icon.className = 'fa-solid fa-moon text-amber-400';
+                text.innerText = 'Dark';
+            } else {
+                icon.className = 'fa-solid fa-sun text-amber-500';
+                text.innerText = 'Light';
+            }
+        }
+
+        const savedTheme = localStorage.getItem('theme') || 'light';
+        document.documentElement.setAttribute('data-theme', savedTheme);
+        updateToggleUI(savedTheme);
+    </script>
+</body>
+</html>
